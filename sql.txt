@@ -1,0 +1,147 @@
+tabelas com integridade dos dados
+
+create table professor(
+cod_professor integer not null,
+nome_professor varchar(50) not null,
+cpf varchar(14) not null,
+sexo char(1) check(sexo in ('F', 'M')),
+email varchar(50),
+telefone varchar(12),
+celular varchar(12) not null,
+logradouro varchar(30) not null,
+numero varchar(6),
+bairro varchar(40) not null,
+cidade varchar(15) not null,
+estado char(2),
+cep varchar(10),
+cod_curso integer not null,
+constraint pkprofessor primary key(cod_professor),
+constraint fk_curso foreign key(cod_curso)
+references curso(cod_curso)
+on delete cascade
+);
+
+
+create table curso(
+cod_curso integer not null,
+nome varchar(50) not null,
+dia_semana varchar(15) check (dia_semana in ('segunda', 'terca', 'quarta', 'quinta', 'sexta')),
+horario varchar(30) not null,
+constraint pkcurso primary key(cod_curso)
+);
+
+
+create table aluno(
+cod_aluno integer not null,
+nome_aluno varchar(50) not null,
+cpf varchar(14) not null,
+sexo char(1) check(sexo in ('F', 'M')),
+email varchar(50),
+telefone varchar(12),
+celular varchar(12) not null,
+logradouro varchar(30) not null,
+numero varchar(6),
+bairro varchar(40) not null,
+cidade varchar(15),
+estado char(2) check(estado in ('PE')),
+cep varchar(10),
+cod_curso integer not null,
+constraint pkaluno primary key(cod_aluno),
+constraint fkcurso foreign key(cod_curso)
+references curso(cod_curso)
+on delete cascade
+);
+
+
+create table contrato(
+cod_contrato integer not null,
+cod_curso integer not null,
+cod_aluno integer not null,
+descricao varchar(30),
+constraint pfcontrato primary key(cod_contrato),
+constraint fkcursocontrato foreign key(cod_curso)
+references curso(cod_curso),
+constraint fkalunocontrato foreign key(cod_aluno)
+references aluno(cod_aluno)
+on delete cascade
+);
+
+
+
+
+create table curso_bda_log(
+cod_curso integer not null,
+nome varchar(50) not null,
+dia_semana varchar(15) check (dia_semana in ('segunda', 'terca', 'quarta', 'quinta', 'sexta')),
+horario varchar(30) not null
+);
+
+
+
+trigger
+CREATE OR REPLACE TRIGGER log_curso_bda
+AFTER DELETE
+ON curso
+FOR EACH ROW
+BEGIN
+INSERT INTO curso_bda_log VALUES 
+(:OLD.cod_curso, :OLD.nome,:OLD.dia_semana,:OLD.horario);
+END;
+
+
+
+
+sequencias
+create sequence cod_curso
+increment by 1
+start with 1
+maxvalue 999
+nocycle;
+
+
+create sequence cod_aluno
+increment by 1
+start with 1
+maxvalue 999
+nocycle;
+
+
+
+create sequence cod_professor
+increment by 1
+start with 1
+maxvalue 999
+nocycle;
+
+
+create sequence cod_contrato
+increment by 1
+start with 1
+maxvalue 999
+nocycle;
+
+
+
+visão
+
+create view visao_aluno
+as select a.cod_curso, a.cod_aluno, a.nome_aluno
+from aluno a, curso c
+where c.cod_curso = a.cod_curso
+order by a.nome_aluno desc
+
+
+subselect 
+
+
+select nome_professor, cpf
+from professor
+where sexo IN (select sexo 
+from professor
+where nome_professor IN ('erivan'));
+
+
+
+
+
+
